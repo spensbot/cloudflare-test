@@ -1,4 +1,4 @@
-# Lib
+# Core
 
 Completely generic code to be reused in any app
 

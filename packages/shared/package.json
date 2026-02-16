@@ -18,6 +18,6 @@
     "zod": "^4.3.6",
     "typescript": "latest",
     "vitest": "latest",
-    "@repo/lib": "workspace:*"
+    "@repo/core": "workspace:*"
   }
 }

@@ -1,15 +1,15 @@
-import { TypedRpc } from "@repo/lib";
-import { z } from "zod";
+import { TypedRpc } from "@repo/core"
+import { z } from "zod"
 
 const InputSchema = z.object({
   name: z.string(),
-});
-type Input = z.infer<typeof InputSchema>;
+})
+type Input = z.infer<typeof InputSchema>
 
 const OutputSchema = z.object({
   message: z.string(),
-});
-type Output = z.infer<typeof OutputSchema>;
+})
+type Output = z.infer<typeof OutputSchema>
 
 export const HelloWorldRpc = new TypedRpc<
   Input,
@@ -17,4 +17,4 @@ export const HelloWorldRpc = new TypedRpc<
   never,
   typeof InputSchema,
   typeof OutputSchema
->(InputSchema, OutputSchema);
+>(InputSchema, OutputSchema)

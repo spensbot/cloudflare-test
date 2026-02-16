@@ -1,5 +1,5 @@
 {
-  "name": "@repo/lib",
+  "name": "@repo/core",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
@@ -18,8 +18,11 @@
     }
   },
   "devDependencies": {
-    "zod": "^4.3.6",
     "typescript": "latest",
-    "vitest": "latest"
+    "vitest": "latest",
+    "zod": "^4.3.6"
+  },
+  "dependencies": {
+    "cross-fetch": "^4.1.0"
   }
 }
