@@ -1,0 +1,23 @@
+{
+  "name": "@repo/shared",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc -w",
+    "lint": "tsc --noEmit",
+    "test": "vitest"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "devDependencies": {
+    "zod": "^4.3.6",
+    "typescript": "latest",
+    "vitest": "latest",
+    "@repo/lib": "workspace:*"
+  }
+}
