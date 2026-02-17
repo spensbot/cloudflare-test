@@ -1,12 +1,14 @@
-import { z } from "zod";
-import { Err, Result } from "../result/Result";
+import { z } from "zod"
+import { Err } from "../result/Result"
+import type { Result } from "../result/Result"
 import {
   rJsonStringify,
   rParse,
   rSchemaParse,
   safeJsonStringify,
-} from "../result/util";
-import { newUnexpectedThrownError, RpcError } from "./RpcError";
+} from "../result/util"
+import { newUnexpectedThrownError } from "./RpcError"
+import type { RpcError } from "./RpcError"
 
 /** Create type-safe, non-throwing methods for calling and executing a Remote Procedure Call */
 export class TypedRpc<
@@ -19,7 +21,7 @@ export class TypedRpc<
   constructor(
     private inputSchema: InputSchema,
     private outputSchema: OutputSchema,
-  ) {}
+  ) { }
 
   /** Execute the RPC
    * - Parses and validates the input
@@ -32,8 +34,8 @@ export class TypedRpc<
     requestBody: string,
     cb: (input: Input) => Promise<Result<Output, Error>>,
   ): Promise<string> {
-    const output = await this.executeTyped(requestBody, cb);
-    return safeJsonStringify(output);
+    const output = await this.executeTyped(requestBody, cb)
+    return safeJsonStringify(output)
   }
 
   /** DOES NOT THROW */
@@ -41,14 +43,14 @@ export class TypedRpc<
     requestBody: string,
     cb: (input: Input) => Promise<Result<Output, Error>>,
   ): Promise<Result<Output, Error | RpcError>> {
-    const input = rParse<Input>(requestBody, this.inputSchema);
-    if (!input.ok) return input;
+    const input = rParse<Input>(requestBody, this.inputSchema)
+    if (!input.ok) return input
 
     try {
-      const output = await cb(input.val);
-      return output;
+      const output = await cb(input.val)
+      return output
     } catch (error) {
-      return Err(newUnexpectedThrownError(error));
+      return Err(newUnexpectedThrownError(error))
     }
   }
 
@@ -84,18 +86,18 @@ export class TypedRpc<
     input: Input,
     cb: (inputJson: string) => Promise<unknown>,
   ): Promise<Result<Output, Error | RpcError>> {
-    const inputJson = rJsonStringify(input);
-    if (!inputJson.ok) return inputJson;
+    const inputJson = rJsonStringify(input)
+    if (!inputJson.ok) return inputJson
 
     try {
-      const response = await cb(inputJson.val);
+      const response = await cb(inputJson.val)
 
-      console.log("response", response);
+      console.log("response", response)
 
-      const output = rSchemaParse<Output>(response, this.outputSchema);
-      return output;
+      const output = rSchemaParse<Output>(response, this.outputSchema)
+      return output
     } catch (error) {
-      return Err(newUnexpectedThrownError(error));
+      return Err(newUnexpectedThrownError(error))
     }
   }
 }

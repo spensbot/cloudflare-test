@@ -4,10 +4,15 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "deploy:worker": "turbo run deploy --filter=@repo/worker",
+    "deploy:worker:production": "cd apps/worker && wrangler deploy --env production",
+    "deploy:web": "cd apps/web && wrangler pages deploy dist --project-name=cloudflare-test-web",
+    "deploy": "pnpm build && pnpm deploy:worker && pnpm deploy:web"
   },
   "devDependencies": {
-    "turbo": "latest"
+    "turbo": "latest",
+    "wrangler": "latest"
   },
   "packageManager": "pnpm@10.19.0"
 }

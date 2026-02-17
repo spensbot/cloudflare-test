@@ -1,0 +1,6 @@
+name = "cloudflare-test-web"
+pages_build_output_dir = "dist"
+compatibility_date = "2025-01-01"
+
+# For Cloudflare Pages deployment
+# The build will be handled by Turborepo: pnpm build --filter=@repo/web

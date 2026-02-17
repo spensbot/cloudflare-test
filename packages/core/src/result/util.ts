@@ -1,5 +1,6 @@
 import z from "zod"
-import { Err, Ok, Result, rThen } from "./Result"
+import { Err, Ok, rThen } from "./Result"
+import type { Result } from "./Result"
 import fetch from "cross-fetch"
 
 export interface BaseError {

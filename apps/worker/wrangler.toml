@@ -1,0 +1,14 @@
+name = "cloudflare-test-worker"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+# Environment-specific configuration
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+[env.development]
+vars = { ENVIRONMENT = "development" }
+
+# Local development uses development environment by default
+# Run with: wrangler dev
+# For other environments: wrangler dev --env production
