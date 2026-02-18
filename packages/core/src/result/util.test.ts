@@ -1,10 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { describe, it, expect, vi } from "vitest"
 import z from "zod"
-import { Result } from "./Result"
-import { ResultSchema } from "./ResultSchema"
 import { rJsonParse, rJsonStringify, rSchemaParse, rParse, rFetch } from "./util"
-
-vi.mock("cross-fetch")
 
 describe("rJsonParse", () => {
   it("parses a valid JSON object", () => {
@@ -143,22 +139,13 @@ describe("rParse", () => {
 })
 
 describe("rFetch", () => {
-  // Import the mocked module so we can control its behavior per test
-  let mockFetch: ReturnType<typeof vi.fn>
-
-  beforeEach(async () => {
-    const crossFetch = await import("cross-fetch")
-    mockFetch = vi.mocked(crossFetch.default)
-    mockFetch.mockReset()
-  })
-
   it("returns Ok with response text on a successful GET", async () => {
-    mockFetch.mockResolvedValue({
+    const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       text: async () => '{"hello":"world"}',
     } as Response)
 
-    const result = await rFetch("https://example.com/api")
+    const result = await rFetch(mockFetch, "https://example.com/api")
     expect(result.ok).toBe(true)
     expect(result.ok && result.val).toBe('{"hello":"world"}')
     expect(mockFetch).toHaveBeenCalledWith("https://example.com/api", {
@@ -169,12 +156,12 @@ describe("rFetch", () => {
   })
 
   it("sends a POST with body when body is provided", async () => {
-    mockFetch.mockResolvedValue({
+    const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       text: async () => "created",
     } as Response)
 
-    const result = await rFetch("https://example.com/api", '{"name":"Alice"}')
+    const result = await rFetch(mockFetch, "https://example.com/api", '{"name":"Alice"}')
     expect(result.ok).toBe(true)
     expect(mockFetch).toHaveBeenCalledWith("https://example.com/api", {
       method: "POST",
@@ -184,13 +171,13 @@ describe("rFetch", () => {
   })
 
   it("returns httpError when response.ok is false", async () => {
-    mockFetch.mockResolvedValue({
+    const mockFetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 404,
       statusText: "Not Found",
     } as Response)
 
-    const result = await rFetch("https://example.com/missing")
+    const result = await rFetch(mockFetch, "https://example.com/missing")
     expect(result.ok).toBe(false)
     expect(!result.ok && result.err.code).toBe("httpError")
     expect(!result.ok && result.err.message).toContain("404")
@@ -198,9 +185,9 @@ describe("rFetch", () => {
   })
 
   it("returns fetchError when fetch throws (e.g. network failure)", async () => {
-    mockFetch.mockRejectedValue(new Error("Network unreachable"))
+    const mockFetch = vi.fn().mockRejectedValue(new Error("Network unreachable"))
 
-    const result = await rFetch("https://example.com/api")
+    const result = await rFetch(mockFetch, "https://example.com/api")
     expect(result.ok).toBe(false)
     expect(!result.ok && result.err.code).toBe("fetchError")
     expect(!result.ok && result.err.message).toContain("Network unreachable")

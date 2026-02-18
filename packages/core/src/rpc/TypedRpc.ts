@@ -69,14 +69,17 @@ export class TypedRpc<
    * DOES NOT THROW. Any internal errors will be captured in the stringified result.
    */
   async call(
+    fetchFn: typeof fetch,
     urlBase: string,
     input: Input,
   ): Promise<Result<Output, Error | RpcError>> {
+    const url = `${urlBase}${this.path}`
+
     const inputJson = rJsonStringify(input)
     console.log("inputJson", inputJson)
     if (!inputJson.ok) return inputJson
 
-    const fetchResult = await rFetch(`${urlBase}${this.path}`, inputJson.val)
+    const fetchResult = await rFetch(fetchFn, url, inputJson.val)
     console.log("fetchResult", fetchResult)
     if (!fetchResult.ok) return fetchResult
 

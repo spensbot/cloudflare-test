@@ -1,7 +1,6 @@
 import z from "zod"
 import { Err, Ok } from "./Result"
 import type { Result } from "./Result"
-import fetch from "cross-fetch"
 
 export interface BaseError {
   message: string
@@ -100,11 +99,12 @@ export const FetchErrorSchema = errorUnionSchema("fetchError")
 export type FetchError = z.infer<typeof FetchErrorSchema>
 
 export async function rFetch(
+  fetchFn: typeof fetch,
   url: string,
   body?: string
 ): Promise<Result<string, FetchError | HttpError>> {
   try {
-    const response = await fetch(url, {
+    const response = await fetchFn(url, {
       method: body ? "POST" : "GET",
       headers: {
         "Content-Type": "application/json",
