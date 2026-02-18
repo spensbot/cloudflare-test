@@ -1,34 +1,21 @@
-# Cloudflare Worker
-
-This worker handles RPC requests from the web app.
-
-## Development
-
-```bash
-pnpm dev
+```txt
+npm install
+npm run dev
 ```
 
-This runs `wrangler dev` which starts a local worker server.
-
-## Deployment
-
-Deploy to development environment:
-```bash
-pnpm deploy
+```txt
+npm run deploy
 ```
 
-Deploy to specific environment:
-```bash
-wrangler deploy --env staging
-wrangler deploy --env production
+[For generating/synchronizing types based on your Worker configuration run](https://developers.cloudflare.com/workers/wrangler/commands/#types):
+
+```txt
+npm run cf-typegen
 ```
 
-## Endpoints
+Pass the `CloudflareBindings` as generics when instantiation `Hono`:
 
-- `POST /api/hello-world` - HelloWorld RPC endpoint
-
-## Environment Variables
-
-Configured via `wrangler.toml`:
-- `ENVIRONMENT` - Current environment (development/staging/production)
-- Affects CORS policy and response behavior
+```ts
+// src/index.ts
+const app = new Hono<{ Bindings: CloudflareBindings }>()
+```

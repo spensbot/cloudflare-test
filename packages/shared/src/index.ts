@@ -1,1 +1,1 @@
-export * from "./HelloWorldRpc";
+export * from "./GreetRpc"

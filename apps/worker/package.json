@@ -1,20 +1,14 @@
 {
-  "name": "@repo/worker",
-  "version": "0.0.0",
-  "private": true,
+  "name": "workers",
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "build": "tsc"
+    "deploy": "wrangler deploy --minify",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
   },
   "dependencies": {
+    "hono": "^4.11.9",
     "@repo/core": "workspace:*",
     "@repo/shared": "workspace:*"
-  },
-  "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250106.0",
-    "typescript": "^5.9.3",
-    "wrangler": "^4.0.0"
   }
 }

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { HelloWorldRpc } from "@repo/shared"
+import { GreetRpc } from "@repo/shared"
 
 function App() {
   const [name, setName] = useState("")
@@ -16,21 +16,16 @@ function App() {
     // Get worker URL from environment variable or default to local dev
     const workerUrl = import.meta.env.VITE_WORKER_URL || "http://localhost:8787"
 
-    const result = await HelloWorldRpc.callData({ name }, async (inputJson) => {
-      const response = await fetch(`${workerUrl}/api/hello-world`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: inputJson,
-      })
-      const text = await response.text()
-      return JSON.parse(text)
-    })
+    const result = await GreetRpc.call(workerUrl, { name })
+
+    console.log("RPC Result:", result)
 
     setLoading(false)
 
     if (result.ok) {
       setMessage(result.val.message)
     } else {
+      console.log("err", result)
       setError(`Error: ${JSON.stringify(result.err)}`)
     }
   }

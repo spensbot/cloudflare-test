@@ -11,10 +11,10 @@ const OutputSchema = z.object({
 })
 type Output = z.infer<typeof OutputSchema>
 
-export const HelloWorldRpc = new TypedRpc<
+export const GreetRpc = new TypedRpc<
   Input,
   Output,
   never,
   typeof InputSchema,
   typeof OutputSchema
->(InputSchema, OutputSchema)
+>("/api/greet", InputSchema, OutputSchema)

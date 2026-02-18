@@ -1,5 +1,5 @@
 import z from "zod"
-import { Err, Ok, rThen } from "./Result"
+import { Err, Ok } from "./Result"
 import type { Result } from "./Result"
 import fetch from "cross-fetch"
 
@@ -18,12 +18,12 @@ export function errorUnionSchema<Code extends string>(code: Code) {
 export const JsonParseErrorSchema = errorUnionSchema("jsonParseError")
 export type JsonParseError = z.infer<typeof JsonParseErrorSchema>
 
-export function rJsonParse<T>(
+export function rJsonParse(
   json: string,
-): Result<T, JsonParseError> {
+): Result<any, JsonParseError> {
   try {
     const parsed = JSON.parse(json)
-    return parsed
+    return Ok(parsed)
   } catch (error) {
     return Err({
       code: "jsonParseError",
@@ -69,6 +69,7 @@ export function rSchemaParse<T>(
   data: unknown,
   schema: z.ZodType<T, unknown>,
 ): Result<T, SchemaValidationError> {
+  console.log("rSchemaParse data", data)
   const parseResult = schema.safeParse(data)
   if (parseResult.success) {
     return Ok(parseResult.data)
@@ -84,11 +85,12 @@ export function rParse<T>(
   json: string,
   schema: z.ZodType<T, unknown>,
 ): Result<T, JsonParseError | SchemaValidationError> {
-  const parsedResult = rJsonParse<any>(json)
+  const parsedResult = rJsonParse(json)
+  console.log("parsedResult", parsedResult)
   if (!parsedResult.ok) {
     return parsedResult
   }
-  return rSchemaParse(schema, parsedResult.val)
+  return rSchemaParse(parsedResult.val, schema)
 }
 
 export const HttpErrorSchema = errorUnionSchema("httpError")
@@ -99,9 +101,16 @@ export type FetchError = z.infer<typeof FetchErrorSchema>
 
 export async function rFetch(
   url: string,
+  body?: string
 ): Promise<Result<string, FetchError | HttpError>> {
   try {
-    const response = await fetch(url)
+    const response = await fetch(url, {
+      method: body ? "POST" : "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body,
+    })
     if (!response.ok) {
       return Err({
         code: "httpError",
@@ -116,14 +125,4 @@ export async function rFetch(
         }`,
     })
   }
-}
-
-export async function rFetchObject<T>(
-  url: string,
-  schema: z.ZodType<T, unknown>,
-): Promise<
-  Result<T, FetchError | HttpError | JsonParseError | SchemaValidationError>
-> {
-  const fetchResult = await rFetch(url)
-  return rThen(fetchResult, (body) => rParse<T>(body, schema))
 }
