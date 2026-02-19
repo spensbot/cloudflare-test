@@ -1,6 +1,6 @@
-import { Hono } from 'hono'
+import { Result, TypedRpc } from '@repo/core'
+import { Context, Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { GreetRpc } from '@repo/shared'
 
 const app = new Hono()
 
@@ -14,19 +14,23 @@ app.use('/*', cors({
   credentials: true,
 }))
 
-app.get('/', (c) => {
-  return c.text('Hello, Hono!')
-})
-
 app.post('/api/greet', async (c) => {
-  const body = await c.req.text()
-
-  const response = await GreetRpc.execute(body, async (input) => {
+  const { GreetRpc } = await import('@repo/shared')
+  return executeRpcHono(c, GreetRpc, async (input) => {
     const message = `Hello, ${input.name}!`
     return { ok: true, val: { message } }
   })
-
-  return c.json(response)
 })
 
 export default app
+
+/** A convenience function for executing RPCs in a Hono context */
+async function executeRpcHono<Input, Output, Error>(
+  c: Context,
+  rpc: TypedRpc<Input, Output, Error>,
+  cb: (input: Input) => Promise<Result<Output, any>>
+): Promise<Response> {
+  const body = await c.req.text()
+  const response = await rpc.execute(body, cb)
+  return c.body(response)
+}

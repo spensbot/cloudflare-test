@@ -17,9 +17,9 @@ import type { RpcError } from "./RpcError"
 export class TypedRpc<
   Input,
   Output,
-  Error,
-  InputSchema extends z.ZodType<Input, unknown>,
-  OutputSchema extends z.ZodType<Output, unknown>,
+  Error = any,
+  InputSchema extends z.ZodType<Input, unknown> = any,
+  OutputSchema extends z.ZodType<Output, unknown> = any,
 > {
   constructor(
     readonly path: string,
@@ -78,8 +78,7 @@ export class TypedRpc<
     const fetchResult = await rFetch(fetchFn, url, body.val)
     if (!fetchResult.ok) return fetchResult
 
-    // TODO(spenser): Why is this coming across as a json serialized string!?
-    const json = JSON.parse(fetchResult.val) as string
+    const json = fetchResult.val
 
     const schema = ResultSchema(this.outputSchema, RpcErrorSchema)
 
