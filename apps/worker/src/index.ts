@@ -15,20 +15,16 @@ app.use('/*', cors({
 }))
 
 app.get('/', (c) => {
-  console.log("Received request for /")
   return c.text('Hello, Hono!')
 })
 
 app.post('/api/greet', async (c) => {
   const body = await c.req.text()
-  console.log("body text", body)
 
   const response = await GreetRpc.execute(body, async (input) => {
     const message = `Hello, ${input.name}!`
     return { ok: true, val: { message } }
   })
-
-  console.log("RPC response", response)
 
   return c.json(response)
 })

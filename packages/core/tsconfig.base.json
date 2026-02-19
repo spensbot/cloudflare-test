@@ -24,5 +24,6 @@
     "sourceMap": true,
     "composite": true,
     "incremental": true
-  }
+  },
+  "exclude": ["**/*.test.ts", "**/*.spec.ts"],
 }

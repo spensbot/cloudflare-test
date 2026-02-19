@@ -55,7 +55,7 @@ export function safeJsonStringify(data: unknown): string {
   if (result.ok) {
     return result.val
   } else {
-    return JSON.stringify(result.err)
+    return JSON.stringify(result)
   }
 }
 
@@ -68,7 +68,6 @@ export function rSchemaParse<T>(
   data: unknown,
   schema: z.ZodType<T, unknown>,
 ): Result<T, SchemaValidationError> {
-  console.log("rSchemaParse data", data)
   const parseResult = schema.safeParse(data)
   if (parseResult.success) {
     return Ok(parseResult.data)
@@ -85,7 +84,6 @@ export function rParse<T>(
   schema: z.ZodType<T, unknown>,
 ): Result<T, JsonParseError | SchemaValidationError> {
   const parsedResult = rJsonParse(json)
-  console.log("parsedResult", parsedResult)
   if (!parsedResult.ok) {
     return parsedResult
   }

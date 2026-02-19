@@ -16,16 +16,13 @@ function App() {
     // Get worker URL from environment variable or default to local dev
     const workerUrl = import.meta.env.VITE_WORKER_URL || "http://localhost:8787"
 
-    const result = await GreetRpc.call(workerUrl, { name })
-
-    console.log("RPC Result:", result)
+    const result = await GreetRpc.call(fetch, workerUrl, { name })
 
     setLoading(false)
 
     if (result.ok) {
       setMessage(result.val.message)
     } else {
-      console.log("err", result)
       setError(`Error: ${JSON.stringify(result.err)}`)
     }
   }

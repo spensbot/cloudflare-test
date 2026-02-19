@@ -3,14 +3,15 @@ import { Err } from "../result/Result"
 import type { Result } from "../result/Result"
 import { ResultSchema } from '../result/ResultSchema'
 import {
+  JsonParseError,
   rFetch,
   rJsonStringify,
   rParse,
   safeJsonStringify,
+  SchemaValidationError,
 } from "../result/util"
 import { newUnexpectedThrownError, RpcErrorSchema } from "./RpcError"
 import type { RpcError } from "./RpcError"
-import { Log } from "../log"
 
 /** Create type-safe, non-throwing methods for calling and executing a Remote Procedure Call */
 export class TypedRpc<
@@ -22,8 +23,8 @@ export class TypedRpc<
 > {
   constructor(
     readonly path: string,
-    private inputSchema: InputSchema,
-    private outputSchema: OutputSchema,
+    readonly inputSchema: InputSchema,
+    readonly outputSchema: OutputSchema,
   ) { }
 
   /** Execute the RPC
@@ -47,14 +48,10 @@ export class TypedRpc<
     cb: (input: Input) => Promise<Result<Output, Error>>,
   ): Promise<Result<Output, Error | RpcError>> {
     const input = rParse<Input>(requestBody, this.inputSchema)
-    Log.debug("RPC raw input", requestBody)
     if (!input.ok) return input
-
-    Log.debug("RPC input", input.val)
 
     try {
       const output = await cb(input.val)
-      Log.debug("RPC output", output)
       return output
     } catch (error) {
       return Err(newUnexpectedThrownError(error))
@@ -72,28 +69,31 @@ export class TypedRpc<
     fetchFn: typeof fetch,
     urlBase: string,
     input: Input,
-  ): Promise<Result<Output, Error | RpcError>> {
+  ): Promise<Result<Output, RpcError>> {
     const url = `${urlBase}${this.path}`
 
-    const inputJson = rJsonStringify(input)
-    console.log("inputJson", inputJson)
-    if (!inputJson.ok) return inputJson
+    const body = rJsonStringify(input)
+    if (!body.ok) return body
 
-    const fetchResult = await rFetch(fetchFn, url, inputJson.val)
-    console.log("fetchResult", fetchResult)
+    const fetchResult = await rFetch(fetchFn, url, body.val)
     if (!fetchResult.ok) return fetchResult
 
-    const resultSchema = ResultSchema(this.outputSchema, RpcErrorSchema)
+    // TODO(spenser): Why is this coming across as a json serialized string!?
+    const json = JSON.parse(fetchResult.val) as string
 
-    const output = rParse<Result<Output, Error | RpcError>>(fetchResult.val, resultSchema)
+    const schema = ResultSchema(this.outputSchema, RpcErrorSchema)
 
-    console.log("output", output)
+    const parseResult = rParse(json, schema) as Result<Result<Output, RpcError>, JsonParseError | SchemaValidationError>
 
-    if (!output.ok) return output
+    const finalResult = flatten(parseResult) as Result<Output, RpcError>
 
-    const output2 = output.val
-
-    console.log("output2", output2)
-    return output2
+    return finalResult
   }
+}
+
+function flatten<T, E1, E2>(nestedResult: Result<Result<T, E1>, E2>): Result<T, E1 | E2> {
+  if (!nestedResult.ok) {
+    return nestedResult
+  }
+  return nestedResult.val
 }
