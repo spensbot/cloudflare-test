@@ -3,12 +3,10 @@ import { Err } from "../result/Result"
 import type { Result } from "../result/Result"
 import { ResultSchema } from '../result/ResultSchema'
 import {
-  JsonParseError,
   rFetch,
   rJsonStringify,
   rParse,
   safeJsonStringify,
-  SchemaValidationError,
 } from "../result/util"
 import { newUnexpectedThrownError, RpcErrorSchema } from "./RpcError"
 import type { RpcError } from "./RpcError"
@@ -82,9 +80,9 @@ export class TypedRpc<
 
     const schema = ResultSchema(this.outputSchema, RpcErrorSchema)
 
-    const parseResult = rParse(json, schema) as Result<Result<Output, RpcError>, JsonParseError | SchemaValidationError>
+    const parseResult = rParse(json, schema)
 
-    const finalResult = flatten(parseResult) as Result<Output, RpcError>
+    const finalResult = flatten(parseResult)
 
     return finalResult
   }
