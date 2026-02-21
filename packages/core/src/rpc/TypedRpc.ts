@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { Err } from "../result/Result"
+import { Err, rFlatten } from "../result/Result"
 import type { Result } from "../result/Result"
 import { ResultSchema } from '../result/ResultSchema'
 import {
@@ -77,20 +77,9 @@ export class TypedRpc<
     if (!fetchResult.ok) return fetchResult
 
     const json = fetchResult.val
-
     const schema = ResultSchema(this.outputSchema, RpcErrorSchema)
-
     const parseResult = rParse(json, schema)
 
-    const finalResult = flatten(parseResult)
-
-    return finalResult
+    return rFlatten(parseResult)
   }
-}
-
-function flatten<T, E1, E2>(nestedResult: Result<Result<T, E1>, E2>): Result<T, E1 | E2> {
-  if (!nestedResult.ok) {
-    return nestedResult
-  }
-  return nestedResult.val
 }

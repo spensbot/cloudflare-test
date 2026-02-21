@@ -57,3 +57,10 @@ export function rmatch<T, U, E>(
 export function rPropogate<U, E>(error: Result<never, E>): Result<U, E> {
   return error
 }
+
+export function rFlatten<T, E1, E2>(nestedResult: Result<Result<T, E1>, E2>): Result<T, E1 | E2> {
+  if (!nestedResult.ok) {
+    return nestedResult
+  }
+  return nestedResult.val
+}
